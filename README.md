@@ -4,6 +4,12 @@
 
 ## Installation
 
+
+```bash
+Database Setup
+$ docker compose up
+```
+
 ```bash
 $ yarn install
 ```

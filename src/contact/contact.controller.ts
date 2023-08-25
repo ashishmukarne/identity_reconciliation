@@ -6,13 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import prisma from 'src/prismaClient';
 import { contactCTEQuery } from './queries';
 
-enum LinkPrecedence {
+export enum LinkPrecedence {
   primary = 'primary',
   secondary = 'secondary',
 }
@@ -22,6 +23,7 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Post(`identify`)
+  @HttpCode(200)
   async create(@Body() createContactDto) {
     let emailMatchedId = 0;
     let phoneNumberMatchedId = 0;
@@ -31,15 +33,6 @@ export class ContactController {
       createContactDto.email,
     );
     contacts.forEach((item) => {
-      console.log(`checking: `, item.id);
-      console.log(
-        `email check: `,
-        createContactDto.email,
-        item.email,
-        emailMatchedId == 0 &&
-          createContactDto.email !== null &&
-          item.email === createContactDto.email,
-      );
       if (
         emailMatchedId == 0 &&
         createContactDto.email !== null &&
@@ -47,6 +40,7 @@ export class ContactController {
       ) {
         emailMatchedId = item.id;
       }
+
       if (
         phoneNumberMatchedId == 0 &&
         createContactDto.phoneNumber != null &&
@@ -55,6 +49,7 @@ export class ContactController {
         phoneNumberMatchedId = item.id;
       }
     });
+
     console.log(`emailMatchedId: `, emailMatchedId, phoneNumberMatchedId);
     // trying to insert same record
     if (phoneNumberMatchedId != 0 && emailMatchedId == phoneNumberMatchedId) {

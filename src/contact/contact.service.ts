@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
+import { LinkPrecedence } from './contact.controller';
 
 @Injectable()
 export class ContactService {
-  create(createContactDto: CreateContactDto) {
+  create(data: CreateContactDto) {
     return 'This action adds a new contact';
   }
 
@@ -23,7 +24,37 @@ export class ContactService {
   remove(id: number) {
     return `This action removes a #${id} contact`;
   }
+
+  sortResult = (contactA, contactB) => {
+    if (contactA.id < contactB.id) {
+      return -1;
+    }
+    if (contactA.id > contactB.id) {
+      return 1;
+    }
+    return 0;
+  };
+
   prepareResponse(contacts) {
+    contacts.sort(this.sortResult);
+    if (contacts.length > 0) {
+      const emails = contacts.map((item) => item.email);
+      const phoneNumbers = contacts.map((item) => item.phoneNumber);
+
+      const filteredContacts = contacts.filter(
+        (item) => item.linkPrecedence === `secondary`,
+      );
+      const secondaryContactIds = filteredContacts.map((item) => item.id);
+      const response = {
+        contact: {
+          primaryContactId: contacts[0].id,
+          emails: [...new Set(emails)],
+          phoneNumbers: [...new Set(phoneNumbers)],
+          secondaryContactIds: [...new Set(secondaryContactIds)],
+        },
+      };
+      return response;
+    }
     return contacts;
   }
 }
