@@ -29,7 +29,7 @@ $ yarn run start:prod
 
 ```bash
 # API URL
-http://localhost:3000/contact/identify
+http://localhost:3000/identify/
 
 # Request Payload
 {

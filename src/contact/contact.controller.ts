@@ -18,11 +18,11 @@ export enum LinkPrecedence {
   secondary = 'secondary',
 }
 
-@Controller('contact')
+@Controller('identify')
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
-  @Post(`identify`)
+  @Post()
   @HttpCode(200)
   async create(@Body() createContactDto) {
     let emailMatchedId = 0;
@@ -50,10 +50,8 @@ export class ContactController {
       }
     });
 
-    console.log(`emailMatchedId: `, emailMatchedId, phoneNumberMatchedId);
     // trying to insert same record
     if (phoneNumberMatchedId != 0 && emailMatchedId == phoneNumberMatchedId) {
-      console.log(`No Insert: `, phoneNumberMatchedId);
       return this.contactService.prepareResponse(contacts);
     }
 
@@ -77,7 +75,6 @@ export class ContactController {
         where: { id: phoneNumberMatchedId },
       });
       contacts.push(updated);
-      console.log(`update secondary: `, updated);
 
       return this.contactService.prepareResponse(contacts);
     }
@@ -87,8 +84,6 @@ export class ContactController {
       createContactDto.linkedId = null;
       createContactDto.linkPrecedence = LinkPrecedence.primary;
       const created = await prisma.contact.create({ data: createContactDto });
-      console.log(`insert primary: `, created);
-      console.log(`ids: `, emailMatchedId && phoneNumberMatchedId);
       contacts.push(created);
       return this.contactService.prepareResponse(contacts);
     }
@@ -103,7 +98,6 @@ export class ContactController {
       createContactDto.linkPrecedence = LinkPrecedence.secondary;
       const created = await prisma.contact.create({ data: createContactDto });
       contacts.push(created);
-      console.log(`insert secondary: `, created);
       return this.contactService.prepareResponse(contacts);
     }
 
@@ -129,7 +123,4 @@ export class ContactController {
   remove(@Param('id') id: string) {
     return this.contactService.remove(+id);
   }
-}
-function objectType(arg0: { name: string; definition(t: any): void }) {
-  throw new Error('Function not implemented.');
 }
