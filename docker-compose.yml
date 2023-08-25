@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:14.5
+    restart: always
+    environment:
+      POSTGRES_DB: identity_rec1
+      POSTGRES_USER: identity_rec1
+      POSTGRES_PASSWORD: identity_rec1
+    ports:
+      - 5436:5432
+    volumes:
+      - ./postgres:/var/lib/postgresql
+volumes:
+  postgres:
