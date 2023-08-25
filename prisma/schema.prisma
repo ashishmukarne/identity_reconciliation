@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://identity_rec1:identity_rec1@localhost:5436/identity_rec1"
+  url      = env("DATABASE_URL")
 }
 
 // postgresql://prisma:prisma@localhost:5433/ziva_db
