@@ -25,8 +25,8 @@ export class ContactController {
   @Post()
   @HttpCode(200)
   async create(@Body() createContactDto) {
-    let emailMatchedId = 0;
-    let phoneNumberMatchedId = 0;
+    let emailMatched = null;
+    let phoneNumberMatched = null;
 
     const contacts: any = await contactCTEQuery(
       createContactDto.phoneNumber,
@@ -34,43 +34,43 @@ export class ContactController {
     );
     contacts.forEach((item) => {
       if (
-        emailMatchedId == 0 &&
+        emailMatched == null &&
         createContactDto.email !== null &&
         item.email === createContactDto.email
       ) {
-        emailMatchedId = item.id;
+        emailMatched = item;
       }
 
       if (
-        phoneNumberMatchedId == 0 &&
+        phoneNumberMatched == null &&
         createContactDto.phoneNumber != null &&
         item.phoneNumber === createContactDto.phoneNumber
       ) {
-        phoneNumberMatchedId = item.id;
+        phoneNumberMatched = item;
       }
     });
 
     // trying to insert same record
-    if (phoneNumberMatchedId != 0 && emailMatchedId == phoneNumberMatchedId) {
+    if (phoneNumberMatched != null && emailMatched == phoneNumberMatched) {
       return this.contactService.prepareResponse(contacts);
     }
 
     // update secondary record
     else if (
-      emailMatchedId != 0 &&
-      phoneNumberMatchedId != 0 &&
-      emailMatchedId != phoneNumberMatchedId
+      emailMatched != null &&
+      phoneNumberMatched != null &&
+      emailMatched.id != phoneNumberMatched.id
     ) {
       createContactDto.linkPrecedence = LinkPrecedence.secondary;
 
       createContactDto.linkedId =
-        phoneNumberMatchedId > emailMatchedId
-          ? emailMatchedId
-          : phoneNumberMatchedId;
+        phoneNumberMatched.id > emailMatched.id
+          ? emailMatched.id
+          : phoneNumberMatched.id;
       const updateRecordId =
-        phoneNumberMatchedId > emailMatchedId
-          ? phoneNumberMatchedId
-          : emailMatchedId;
+        phoneNumberMatched.id > emailMatched.id
+          ? phoneNumberMatched.id
+          : emailMatched.id;
 
       createContactDto.linkPrecedence = LinkPrecedence.secondary;
       const updated = await prisma.contact.update({
@@ -83,7 +83,7 @@ export class ContactController {
     }
 
     // insert primary
-    else if (emailMatchedId == 0 && phoneNumberMatchedId == 0) {
+    else if (emailMatched == null && phoneNumberMatched == null) {
       createContactDto.linkedId = null;
       createContactDto.linkPrecedence = LinkPrecedence.primary;
       const created = await prisma.contact.create({ data: createContactDto });
@@ -93,11 +93,11 @@ export class ContactController {
 
     // insert secondary record
     else if (
-      (emailMatchedId == 0 && phoneNumberMatchedId != 0) ||
-      (emailMatchedId != 0 && phoneNumberMatchedId == 0)
+      (emailMatched == null && phoneNumberMatched != null) ||
+      (emailMatched != null && phoneNumberMatched == null)
     ) {
       createContactDto.linkedId =
-        phoneNumberMatchedId != 0 ? phoneNumberMatchedId : emailMatchedId;
+        phoneNumberMatched != null ? phoneNumberMatched.id : emailMatched.id;
       createContactDto.linkPrecedence = LinkPrecedence.secondary;
       const created = await prisma.contact.create({ data: createContactDto });
       contacts.push(created);
