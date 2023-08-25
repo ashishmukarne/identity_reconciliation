@@ -61,18 +61,21 @@ export class ContactController {
       phoneNumberMatchedId != 0 &&
       emailMatchedId != phoneNumberMatchedId
     ) {
-      createContactDto.linkedId = phoneNumberMatchedId;
       createContactDto.linkPrecedence = LinkPrecedence.secondary;
 
       createContactDto.linkedId =
         phoneNumberMatchedId > emailMatchedId
           ? emailMatchedId
           : phoneNumberMatchedId;
+      const updateRecordId =
+        phoneNumberMatchedId > emailMatchedId
+          ? phoneNumberMatchedId
+          : emailMatchedId;
 
       createContactDto.linkPrecedence = LinkPrecedence.secondary;
       const updated = await prisma.contact.update({
         data: createContactDto,
-        where: { id: phoneNumberMatchedId },
+        where: { id: updateRecordId },
       });
       contacts.push(updated);
 
