@@ -38,11 +38,16 @@ export class ContactService {
   prepareResponse(contacts) {
     contacts.sort(this.sortResult);
     if (contacts.length > 0) {
-      const emails = contacts.map((item) => item.email);
-      const phoneNumbers = contacts.map((item) => item.phoneNumber);
+      const emails = contacts
+        .filter((item) => item.email !== null)
+        .map((item) => item.email);
+      const phoneNumbers = contacts
+        .filter((item) => item.phoneNumber !== null)
+        .map((item) => item.phoneNumber);
 
       const filteredContacts = contacts.filter(
-        (item) => item.linkPrecedence === `secondary`,
+        (item) =>
+          item.linkPrecedence === `secondary` && item.linkPrecedence !== null,
       );
       const secondaryContactIds = filteredContacts.map((item) => item.id);
       const response = {

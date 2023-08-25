@@ -51,7 +51,13 @@ export class ContactController {
     });
 
     // trying to insert same record
-    if (phoneNumberMatched != null && emailMatched == phoneNumberMatched) {
+    if (
+      createContactDto.phoneNumber &&
+      createContactDto.email &&
+      phoneNumberMatched != null &&
+      emailMatched !== null &&
+      emailMatched.id == phoneNumberMatched.id
+    ) {
       return this.contactService.prepareResponse(contacts);
     }
 
@@ -64,11 +70,13 @@ export class ContactController {
       createContactDto.linkPrecedence = LinkPrecedence.secondary;
 
       createContactDto.linkedId =
-        phoneNumberMatched.id > emailMatched.id
+        phoneNumberMatched.createdAt.getTime() >
+        emailMatched.createdAt.getTime()
           ? emailMatched.id
           : phoneNumberMatched.id;
       const updateRecordId =
-        phoneNumberMatched.id > emailMatched.id
+        phoneNumberMatched.createdAt.getTime() >
+        emailMatched.createdAt.getTime()
           ? phoneNumberMatched.id
           : emailMatched.id;
 
@@ -84,6 +92,7 @@ export class ContactController {
 
     // insert primary
     else if (emailMatched == null && phoneNumberMatched == null) {
+      console.log(`primary: `, emailMatched, phoneNumberMatched);
       createContactDto.linkedId = null;
       createContactDto.linkPrecedence = LinkPrecedence.primary;
       const created = await prisma.contact.create({ data: createContactDto });
@@ -93,8 +102,12 @@ export class ContactController {
 
     // insert secondary record
     else if (
-      (emailMatched == null && phoneNumberMatched != null) ||
-      (emailMatched != null && phoneNumberMatched == null)
+      (emailMatched == null &&
+        phoneNumberMatched != null &&
+        createContactDto.email !== null) ||
+      (emailMatched != null &&
+        phoneNumberMatched == null &&
+        createContactDto.phoneNumber !== null)
     ) {
       createContactDto.linkedId =
         phoneNumberMatched != null ? phoneNumberMatched.id : emailMatched.id;
@@ -104,6 +117,6 @@ export class ContactController {
       return this.contactService.prepareResponse(contacts);
     }
 
-    return contacts;
+    return this.contactService.prepareResponse(contacts);
   }
 }
