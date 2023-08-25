@@ -13,11 +13,12 @@ datasource db {
 
 // postgresql://prisma:prisma@localhost:5433/ziva_db
 model Contact {
-  id             Int      @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   phoneNumber    String?
   email          String?
   linkPrecedence String
   linkedId       Int?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt()
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt()
+  deletedAt      DateTime?
 }
